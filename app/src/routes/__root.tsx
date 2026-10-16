@@ -8,9 +8,6 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { button } from "@higgsfield/quanta/button";
-import { NotFound } from "@higgsfield/quanta/not-found";
-
 import appCss from "../styles.css?url";
 import { reportHiggsfieldError } from "../lib/higgsfield-error-reporting";
 // Page metadata (browser <title>/favicon + social og: tags) committed into the
@@ -109,12 +106,59 @@ function buildHead(meta: AppMeta) {
   };
 }
 
+// Local UI primitives. The project previously imported these from the
+// Higgsfield platform UI package, which is not available outside Higgsfield —
+// these standalone equivalents keep the same markup and behaviour.
+const BUTTON_VARIANTS = {
+  primary: "bg-white text-neutral-900 hover:bg-neutral-200",
+  outline: "border border-neutral-600 text-white hover:bg-white/10",
+} as const;
+
+const BUTTON_SIZES = { md: "px-4 py-2 text-sm" } as const;
+
+function button(
+  { variant = "primary", size = "md" }: { variant?: "primary" | "outline"; size?: "md" },
+  extra = "",
+) {
+  return [
+    "inline-flex items-center justify-center rounded-md font-medium transition-colors",
+    BUTTON_SIZES[size],
+    BUTTON_VARIANTS[variant],
+    extra,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function NotFound({
+  icon,
+  title,
+  subtitle,
+  className,
+  children,
+}: {
+  icon?: ReactNode;
+  title: string;
+  subtitle?: string;
+  className?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className={className}>
+      {icon}
+      <h1 className="mt-3 text-xl font-semibold text-white">{title}</h1>
+      {subtitle ? <p className="mt-2 text-sm text-neutral-400">{subtitle}</p> : null}
+      {children}
+    </div>
+  );
+}
+
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-q-background-primary px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-neutral-950 px-4">
       <NotFound
-        className="mx-auto max-w-md"
-        icon={<span className="text-q-title-md-semi-bold text-q-text-primary">404</span>}
+        className="mx-auto max-w-md text-center"
+        icon={<span className="text-2xl font-semibold text-white">404</span>}
         title="Page not found"
         subtitle="The page you're looking for doesn't exist or has been moved."
       >
@@ -134,10 +178,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-q-background-primary px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-neutral-950 px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-q-title-lg-semi-bold text-q-text-primary">This page didn't load</h1>
-        <p className="mt-2 text-q-body-sm-regular text-q-text-secondary">
+        <h1 className="text-xl font-semibold text-white">This page didn't load</h1>
+        <p className="mt-2 text-sm text-neutral-400">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -171,13 +215,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" data-theme="default-dark" style={{ colorScheme: "dark" }}>
-      {/* Marketplace apps are permanently dark: data-theme is pinned on <html>
-          above. Do not add quanta's bootstrapScript/ThemeController, a theme
-          toggle, or a light mode. */}
       <head>
         <HeadContent />
       </head>
-      <body className="bg-q-background-primary text-q-text-primary">
+      <body className="bg-neutral-950 text-white">
         {children}
         <Scripts />
       </body>
